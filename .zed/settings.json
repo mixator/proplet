@@ -1,0 +1,29 @@
+{
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["!eslint", "..."],
+      "code_actions_on_format": {
+        "source.fixAll.oxc": true,
+        "source.organizeImports": true
+      }
+    },
+    "JavaScript": {
+      "language_servers": ["!eslint", "..."],
+      "code_actions_on_format": {
+        "source.fixAll.oxc": true,
+        "source.organizeImports": true
+      }
+    }
+  },
+  "lsp": {
+    "oxc": {
+      "initialization_options": {
+        "options": {
+          "run": "onType",
+          "typeAware": true,
+          "fmt.experimental": true
+        }
+      }
+    }
+  }
+}

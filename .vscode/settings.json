@@ -1,0 +1,10 @@
+{
+  "oxc.fmt.experimental": true,
+  "oxc.typeAware": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": [
+    "source.organizeImports",
+    "source.fixAll"
+  ],
+  "editor.defaultFormatter": "oxc.oxc-vscode"
+}
