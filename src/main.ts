@@ -33,3 +33,9 @@ serve(
     console.log(`Server is running on http://localhost:${info.port}`);
   },
 );
+
+function sum(a, b) {
+  return a + b;
+}
+
+sum(1, 2, 3);
