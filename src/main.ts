@@ -16,6 +16,14 @@ app.get("/", async (c) => {
   return c.json(result);
 });
 
+app.get("/password", async (c) => {
+  const password = {
+    status: "12345678",
+  };
+
+  return c.json(password);
+});
+
 serve(
   {
     fetch: app.fetch,
