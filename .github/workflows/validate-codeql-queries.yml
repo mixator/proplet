@@ -1,0 +1,115 @@
+name: Validate CodeQL Queries
+
+on:
+  push:
+    paths:
+      - 'codeql-custom-queries-javascript/**'
+      - '.github/workflows/validate-codeql-queries.yml'
+  pull_request:
+    paths:
+      - 'codeql-custom-queries-javascript/**'
+      - '.github/workflows/validate-codeql-queries.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Custom Queries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+
+      - name: Install query pack dependencies
+        run: |
+          cd codeql-custom-queries-javascript
+          codeql pack install
+
+      - name: Validate query pack
+        run: |
+          cd codeql-custom-queries-javascript
+          echo "📦 Validating CodeQL pack structure..."
+          codeql pack ls
+
+      - name: Compile all queries
+        run: |
+          cd codeql-custom-queries-javascript
+          echo "🔨 Compiling custom queries..."
+          for query in *.ql; do
+            if [ -f "$query" ]; then
+              echo "Compiling $query..."
+              codeql query compile "$query" || exit 1
+            fi
+          done
+          echo "✅ All queries compiled successfully!"
+
+      - name: Format check
+        run: |
+          cd codeql-custom-queries-javascript
+          echo "🎨 Checking query formatting..."
+          for query in *.ql; do
+            if [ -f "$query" ] && [ "$query" != "example.ql" ]; then
+              echo "Checking format of $query..."
+              # Format and check if any changes would be made
+              codeql query format "$query" > /tmp/formatted.ql
+              if ! diff -q "$query" /tmp/formatted.ql > /dev/null; then
+                echo "⚠️  Warning: $query is not properly formatted"
+                echo "Run: codeql query format -i $query"
+              fi
+            fi
+          done
+          echo "✅ Format check complete!"
+
+      - name: Query metadata validation
+        run: |
+          cd codeql-custom-queries-javascript
+          echo "📋 Validating query metadata..."
+          for query in *.ql; do
+            if [ -f "$query" ] && [ "$query" != "example.ql" ]; then
+              echo "Checking $query..."
+
+              # Check for required metadata
+              if ! grep -q "@name" "$query"; then
+                echo "❌ Error: $query missing @name metadata"
+                exit 1
+              fi
+
+              if ! grep -q "@description" "$query"; then
+                echo "❌ Error: $query missing @description metadata"
+                exit 1
+              fi
+
+              if ! grep -q "@kind" "$query"; then
+                echo "❌ Error: $query missing @kind metadata"
+                exit 1
+              fi
+
+              if ! grep -q "@id" "$query"; then
+                echo "❌ Error: $query missing @id metadata"
+                exit 1
+              fi
+
+              echo "✅ $query metadata valid"
+            fi
+          done
+          echo "✅ All query metadata validated!"
+
+      - name: Summary
+        run: |
+          echo "## ✅ CodeQL Query Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All custom CodeQL queries have been validated successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Custom Queries" >> $GITHUB_STEP_SUMMARY
+          cd codeql-custom-queries-javascript
+          for query in *.ql; do
+            if [ -f "$query" ] && [ "$query" != "example.ql" ]; then
+              query_name=$(grep "@name" "$query" | head -1 | sed 's/.*@name //' | sed 's/\*\///')
+              echo "- ✅ $query: $query_name" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

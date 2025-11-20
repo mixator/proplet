@@ -1,0 +1,33 @@
+name: "CodeQL Config"
+
+# Paths to include in analysis
+paths:
+  - src
+
+# Paths to exclude from analysis
+paths-ignore:
+  - node_modules
+  - dist
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/__tests__/**"
+
+# Query suites to run
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+# Custom query packs
+packs:
+  - codeql/javascript-queries
+  - getting-started/codeql-extra-queries-javascript
+
+# Disable default queries (optional - remove if you want default queries)
+# disable-default-queries: true
+
+# Query filters (optional)
+query-filters:
+  - exclude:
+      id: js/unused-local-variable
+  - exclude:
+      tags contain: experimental
